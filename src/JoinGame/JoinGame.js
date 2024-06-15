@@ -1,24 +1,30 @@
 import { useState,useRef } from "react";
 import "./JoinGame.css";
 import io from 'socket.io-client';
+import { useNavigate } from "react-router-dom";
 
 export function JoinGame(){
     const roomRef = useRef(null);
+    const nameRef = useRef(null);
+    const navigate = useNavigate();
+
+    const socket = io('http://localhost:4000');
 
     const [room,setRoom] = useState('');
     const [usename,setName] = useState('');
 
-    io.on('connection', (socket) => {
-        console.log('a user connected');
-        socket.on('disconnect', () => {
-            console.log('user disconnected');
-        });
+    socket.on('chat message', (msg) => {
+        console.log(msg);
+        navigate('/room/'+msg);
     });
 
-    const joinRoom = (room) => {
+
+    const joinRoom = () => {
         setRoom(roomRef.current.value);
         console.log(roomRef.current.value);
+        socket.emit('chat message',roomRef.current.value);
     };
+
     return (
         <div className="page">
             <div className="middle">
@@ -31,8 +37,7 @@ export function JoinGame(){
             />
             <input 
                 type="text" 
-                value={usename}
-                onChange={(e) => setName(e.target.value)}
+                ref = {nameRef}
                 placeholder="your name"
             />
             <button onClick={joinRoom}>Enter</button>

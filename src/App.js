@@ -1,6 +1,7 @@
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
-import {JoinGame} from './JoinGame/JoinGame.js'
+import {JoinGame} from './JoinGame/JoinGame.js';
+import { GameRoom } from './GameRoom/GameRoom.js';
 
 //
 import React, { useState, useEffect } from 'react';
@@ -15,6 +16,7 @@ function App() {
     <Router>
       <Routes>
         <Route path='/' element={<JoinGame/>}/>
+        <Route path='/room/:roomID' element={<GameRoom/>}/>
       </Routes>
     </Router>
   );
