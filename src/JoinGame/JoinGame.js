@@ -1,6 +1,5 @@
 import { useState,useRef } from "react";
 import "./JoinGame.css";
-import io from 'socket.io-client';
 import { useNavigate } from "react-router-dom";
 
 export function JoinGame(){
@@ -8,21 +7,9 @@ export function JoinGame(){
     const nameRef = useRef(null);
     const navigate = useNavigate();
 
-    const socket = io('http://localhost:4000');
-
-    const [room,setRoom] = useState('');
-    const [usename,setName] = useState('');
-
-    socket.on('chat message', (msg) => {
-        console.log(msg);
-        navigate('/room/'+msg);
-    });
-
 
     const joinRoom = () => {
-        setRoom(roomRef.current.value);
-        console.log(roomRef.current.value);
-        socket.emit('chat message',roomRef.current.value);
+        navigate('/room/'+roomRef.current.value + '/'+nameRef.current.value);
     };
 
     return (
