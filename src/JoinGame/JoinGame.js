@@ -1,26 +1,29 @@
 import { useState,useRef } from "react";
 import "./JoinGame.css";
 import { useNavigate } from "react-router-dom";
-import { createNumberRoom } from "../Database/DBFunctions";
+import { useCreateNumberRoom } from "../Database/DBFunctions";
 
 export function JoinGame(){
     const roomRef = useRef(null);
     const nameRef = useRef(null);
     const navigate = useNavigate();
 
+    const {createNumRoom, isLoading} = useCreateNumberRoom();
+
 
     const joinRoom = () => {
         navigate('/gubs/'+roomRef.current.value + '/'+nameRef.current.value);
     };
 
-    const joinNumber = () => {
-        alert(nameRef.current.value+roomRef.current.value);
-        if(createNumberRoom(nameRef.current.value,roomRef.current.value)){
+    async function joinNumber(){
+        // alert(nameRef.current.value+roomRef.current.value);
+        let t = await createNumRoom(nameRef.current.value,roomRef.current.value);
+        if(t){
             navigate('/numbers/'+roomRef.current.value + '/'+nameRef.current.value);
         } else{
-            alert("The grinch stole your username");
+            alert("The grinch stole your username. Pick a different one.");
         }
-    };
+    }
 
     const validateForms = () => {
         const room = document.getElementById("room");
@@ -50,7 +53,7 @@ export function JoinGame(){
                 id="urname"
             />
             <button onClick={joinRoom}>Enter</button>
-            <button onClick={joinNumber}>Play the Middle Number Game</button>
+            <button onClick={joinNumber} isLoading={isLoading}>Play the Middle Number Game</button>
         </div>
     );
 }

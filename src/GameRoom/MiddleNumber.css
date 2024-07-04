@@ -1,5 +1,14 @@
 .pagenumber{
+    width: fill;
+    height: 100vh;
     background-color: rgb(26, 190, 174);
     color: rgb(52, 52, 52);
     font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    font-size: 20px;
+    vertical-align: middle;
+}
+
+.headertext{
+    font-size: 40px;
 }

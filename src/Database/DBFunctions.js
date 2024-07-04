@@ -1,4 +1,5 @@
 import { getDatabase, ref, set, get, child } from 'firebase/database';
+import { useState } from 'react';
 // import { Navigate } from 'react-router-dom';
 
 export function createRoom(uname,gameroom){
@@ -25,38 +26,70 @@ export function createRoom(uname,gameroom){
     
 }
 
-export async function createNumberRoom(uname,gameroom){
-    alert("may i");
-    const db = getDatabase();
-    const refe = ref(db,"numrooms/"+gameroom);
-    get(child(refe, '/unamesnum')).then((snapshot) => {
-        if (snapshot.exists()) {
-            let temp = snapshot.val();
-            alert("anybody home");
+export function useGetPlayers(){
+    const [isLoading,setLoading] = useState(false);
 
-            for(let i = 0; i < temp.length; i++){
-                alert(temp[i]);
-                if(temp[i] == uname){
-                    alert("Username already chosen");
-                    return false;
+    async function getPlayers(gameroom){
+        setLoading(true);
+
+        const db = getDatabase();
+        const refe = ref(db,"numrooms/"+gameroom+"/unamesnum");
+
+        await get(refe).then((snapshot) => {
+            return snapshot.val();
+        });
+
+        setLoading(false);
+    }
+
+    return {getPlayers, isLoading};
+}
+
+export function useCreateNumberRoom(){
+    const [isLoading, setLoading] = useState(false);
+
+    async function createNumRoom(uname,gameroom){
+        setLoading(true);
+        const db = getDatabase();
+        const refe = ref(db,"numrooms/"+gameroom);
+        let v = false;
+        await get(child(refe, '/unamesnum')).then((snapshot) => {
+            if (snapshot.exists()) {
+                let temp = snapshot.val();
+                // alert("anybody home");
+                v = true;
+                for(let i = 0; i < temp.length; i++){
+                    // alert(temp[i]);
+                    if(temp[i] == uname){
+                        alert("Username already chosen");
+                        setLoading(false);
+                        v = false;
+                    }
                 }
+                if(v){
+                    temp[temp.length] = uname;
+                    set(refe, {
+                        unamesnum: temp,
+                        started: false
+                    });
+                    alert("getting through the cool way");
+                }
+                
+            } else {
+                v = true;
+                set(refe, {
+                        unamesnum: [uname],
+                        started: false
+                    });
+                alert("getting through");
             }
-            temp[temp.length] = uname;
-            set(refe, {
-                unamesnum: temp,
-                started: false
-            });
-        } else {
-            alert("not found??");
-            set(refe, {
-                    unamesnum: [uname],
-                    started: false
-                });
-        }
-        return true;
-    }).catch((error) => {
-        console.error(error);
-    });
-    return true;
+        }).catch((error) => {
+            console.error(error);
+        });
+        setLoading(false);
+        return v;
+    }
+
+    return {createNumRoom,isLoading};
     
 }
