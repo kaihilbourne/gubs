@@ -3,12 +3,8 @@ import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import {JoinGame} from './JoinGame/JoinGame.js';
 import { GameRoom } from './GameRoom/GameRoom.js';
 
-//
 import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
-
-const socket = io('http://localhost:4000');
-//
+import { MiddleNumber } from './GameRoom/MiddleNumber.js';
 
 
 function App() {
@@ -16,7 +12,8 @@ function App() {
     <Router>
       <Routes>
         <Route path='/' element={<JoinGame/>}/>
-        <Route path='/room/:roomID' element={<GameRoom/>}/>
+        <Route path='/gubs/:roomID/:uname' element={<GameRoom/>}/>
+        <Route path='/numbers/:roomID/:uname' element={<MiddleNumber/>}/>
       </Routes>
     </Router>
   );

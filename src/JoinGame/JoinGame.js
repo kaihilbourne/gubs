@@ -1,28 +1,36 @@
 import { useState,useRef } from "react";
 import "./JoinGame.css";
-import io from 'socket.io-client';
 import { useNavigate } from "react-router-dom";
+import { useCreateNumberRoom } from "../Database/DBFunctions";
 
 export function JoinGame(){
     const roomRef = useRef(null);
     const nameRef = useRef(null);
     const navigate = useNavigate();
 
-    const socket = io('http://localhost:4000');
-
-    const [room,setRoom] = useState('');
-    const [usename,setName] = useState('');
-
-    socket.on('chat message', (msg) => {
-        console.log(msg);
-        navigate('/room/'+msg);
-    });
+    const {createNumRoom, isLoading} = useCreateNumberRoom();
 
 
     const joinRoom = () => {
-        setRoom(roomRef.current.value);
-        console.log(roomRef.current.value);
-        socket.emit('chat message',roomRef.current.value);
+        navigate('/gubs/'+roomRef.current.value + '/'+nameRef.current.value);
+    };
+
+    async function joinNumber(){
+        // alert(nameRef.current.value+roomRef.current.value);
+        let t = await createNumRoom(nameRef.current.value,roomRef.current.value);
+        if(t){
+            navigate('/numbers/'+roomRef.current.value + '/'+nameRef.current.value);
+        } else{
+            alert("The grinch stole your username. Pick a different one.");
+        }
+    }
+
+    const validateForms = () => {
+        const room = document.getElementById("room");
+        const urname = document.getElementById("urname");
+        if(room.value[-1] != "[a-z]"){
+            room.value = room.value[0,-1];
+        }
     };
 
     return (
@@ -34,13 +42,18 @@ export function JoinGame(){
                 ref={roomRef}
                 type="text"
                 placeholder="Room name"
+                pattern="[a-z]{3,}"
+                id="room"
             />
             <input 
                 type="text" 
                 ref = {nameRef}
                 placeholder="your name"
+                pattern="[a-z]{3,}"
+                id="urname"
             />
             <button onClick={joinRoom}>Enter</button>
+            <button onClick={joinNumber} isLoading={isLoading}>Play the Middle Number Game</button>
         </div>
     );
 }

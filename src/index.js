@@ -2,10 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
 
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBtYu3SY_XTXzDc3lK09944M_qfdIqJyIA",
@@ -20,19 +18,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-function updateUserScores(userID,uname,gamerecord){
-  const db = getDatabase();
-  const reference = ref(db,"users/"+userID);
-  
 
 
-  set(reference, {
-      username: uname,
-      gamerecord: gamerecord
-  });
-}
-
-updateUserScores("burg","burgsauce","{wins: 1}");
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
