@@ -2,12 +2,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./MiddleNumber.css";
 // import { useGetPlayers } from "../Database/DBFunctions";
 import { getDatabase, ref, onValue, get, set, remove} from "firebase/database";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export function MiddleNumber(){
+    const numRef = useRef(null);
 
     const [playerNames, setPlayerNames] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [ready, setReady] = useState(0);
     const { roomID, uname } = useParams();
     const navigate = useNavigate();
     // const { getPlayers, isLoading } = useGetPlayers();
@@ -19,7 +21,7 @@ export function MiddleNumber(){
             if(snapshot.exists()){
                 let temp = snapshot.val();
                 for(let i = 0; i < temp.length; i++){
-                    if(temp[i] == uname){
+                    if(temp[i].uname == uname){
                         temp.splice(i,1);
                         break;
                     }
@@ -51,19 +53,62 @@ export function MiddleNumber(){
 
     }, [roomID]);
 
+    async function submitNumber(){
+        const db = getDatabase();
+        const reff = ref(db,"numrooms/"+roomID+"/unamesnum");
+
+        
+    }
+
     
 
-    const playerNamesDiv = playerNames.map(item => <p>{item}</p>);
+    const playerNamesDiv = playerNames.map(item => <p>{item.uname} {item.num}</p>);
 
 
     return(
         <div className="pagenumber">
-            {roomID}
-            <button onClick={gohome}>Go home</button>
-            { loading
-                ? <p>UHHHHHH</p>
-                : playerNamesDiv
+            <div className="subthing">
+                <p className="headertext">The Middle Number Game</p>
+                {roomID}
+                <button onClick={gohome}>Go home</button>
+                { loading
+                    ? <p>UHHHHHH</p>
+                    : playerNamesDiv
+                }
+            </div>
+            <div className="subthing">
+            <input 
+                ref={numRef}
+                type="number"
+                placeholder="enter your number"
+                pattern="[0-9]"
+                id="num"
+            />
+            {
+                ready == 0
+                ? 
+                <div>
+                <button>
+                    Submit your number
+                </button>
+                </div>
+                :
+                ready == 1
+                ?
+                <div>
+                <button>
+                    Take it back?
+                </button>
+                </div>
+                :
+                <div>
+                <button>
+                    Start again
+                </button>
+                </div>
             }
+            
+            </div>
         </div>
     );
 }

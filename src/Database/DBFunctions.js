@@ -56,18 +56,17 @@ export function useCreateNumberRoom(){
         await get(child(refe, '/unamesnum')).then((snapshot) => {
             if (snapshot.exists()) {
                 let temp = snapshot.val();
-                // alert("anybody home");
                 v = true;
                 for(let i = 0; i < temp.length; i++){
                     // alert(temp[i]);
-                    if(temp[i] == uname){
+                    if(temp[i].uname == uname){
                         alert("Username already chosen");
                         setLoading(false);
                         v = false;
                     }
                 }
                 if(v){
-                    temp[temp.length] = uname;
+                    temp[temp.length] = {uname:uname, num:0};
                     set(refe, {
                         unamesnum: temp,
                         started: false
@@ -78,7 +77,7 @@ export function useCreateNumberRoom(){
             } else {
                 v = true;
                 set(refe, {
-                        unamesnum: [uname],
+                        unamesnum: [{uname:uname, num:0}],
                         started: false
                     });
                 alert("getting through");
