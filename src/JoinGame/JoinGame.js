@@ -45,7 +45,7 @@ export function JoinGame(){
                 id="urname"
             />
             <button onClick={joinRoom}>Enter</button>
-            <button onClick={joinNumber} isLoading={isLoading}>Play the Middle Number Game</button>
+            <button onClick={joinNumber} disabled={isLoading}>Play the Middle Number Game</button>
         </div>
     );
 }
