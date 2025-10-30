@@ -3,7 +3,7 @@ import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import {JoinGame} from './JoinGame/JoinGame.js';
 import { GameRoom } from './GameRoom/GameRoom.js';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { MiddleNumber } from './GameRoom/MiddleNumber.js';
 
 

@@ -16,7 +16,7 @@ const firebaseConfig = {
   measurementId: "G-2DEX510CWW"
 };
 
-const app = initializeApp(firebaseConfig);
+initializeApp(firebaseConfig);
 
 
 

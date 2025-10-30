@@ -1,4 +1,4 @@
-import { useState,useRef } from "react";
+import { useRef } from "react";
 import "./JoinGame.css";
 import { useNavigate } from "react-router-dom";
 import { useCreateNumberRoom } from "../Database/DBFunctions";
@@ -25,14 +25,6 @@ export function JoinGame(){
         }
     }
 
-    const validateForms = () => {
-        const room = document.getElementById("room");
-        const urname = document.getElementById("urname");
-        if(room.value[-1] != "[a-z]"){
-            room.value = room.value[0,-1];
-        }
-    };
-
     return (
         <div className="page">
             <div className="middle">
@@ -53,7 +45,7 @@ export function JoinGame(){
                 id="urname"
             />
             <button onClick={joinRoom}>Enter</button>
-            <button onClick={joinNumber} isLoading={isLoading}>Play the Middle Number Game</button>
+            <button onClick={joinNumber} disabled={isLoading}>Play the Middle Number Game</button>
         </div>
     );
 }
