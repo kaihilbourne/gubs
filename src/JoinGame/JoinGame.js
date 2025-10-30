@@ -1,4 +1,4 @@
-import { useState,useRef } from "react";
+import { useRef } from "react";
 import "./JoinGame.css";
 import { useNavigate } from "react-router-dom";
 import { useCreateNumberRoom } from "../Database/DBFunctions";
@@ -24,14 +24,6 @@ export function JoinGame(){
             alert("The grinch stole your username. Pick a different one.");
         }
     }
-
-    const validateForms = () => {
-        const room = document.getElementById("room");
-        const urname = document.getElementById("urname");
-        if(room.value[-1] != "[a-z]"){
-            room.value = room.value[0,-1];
-        }
-    };
 
     return (
         <div className="page">

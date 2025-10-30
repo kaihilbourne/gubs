@@ -59,7 +59,7 @@ export function useCreateNumberRoom(){
                 v = true;
                 for(let i = 0; i < temp.length; i++){
                     // alert(temp[i]);
-                    if(temp[i].uname == uname){
+                    if(temp[i].uname === uname){
                         alert("Username already chosen");
                         setLoading(false);
                         v = false;
