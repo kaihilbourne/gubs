@@ -1,0 +1,30 @@
+{
+  "rules": {
+    "numrooms": {
+      "$roomId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['unamesnum', 'suggestedNumber'])",
+        
+        "unamesnum": {
+          ".validate": "newData.isString() === false",
+          "$index": {
+            ".validate": "newData.hasChildren(['uname', 'num']) && newData.child('uname').isString() && newData.child('uname').val().matches(/^[a-zA-Z0-9_-]{3,20}$/) && newData.child('num').isNumber() && newData.child('num').val() >= 0 && newData.child('num').val() <= 9999"
+          }
+        },
+        
+        "suggestedNumber": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999"
+        }
+      }
+    },
+    
+    "gubs": {
+      "$roomId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren()"
+      }
+    }
+  }
+}
