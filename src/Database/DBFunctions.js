@@ -22,6 +22,7 @@ export function createRoom(uname,gameroom){
         }
     }).catch((error) => {
         console.error(error);
+        alert("Error: " + error.message);
     });
     
 }
@@ -58,7 +59,6 @@ export function useCreateNumberRoom(){
                 let temp = snapshot.val();
                 v = true;
                 for(let i = 0; i < temp.length; i++){
-                    // alert(temp[i]);
                     if(temp[i].uname === uname){
                         alert("Username already chosen");
                         setLoading(false);
@@ -84,6 +84,7 @@ export function useCreateNumberRoom(){
             }
         }).catch((error) => {
             console.error(error);
+            alert("Database error: " + JSON.stringify(error));
         });
         setLoading(false);
         return v;
