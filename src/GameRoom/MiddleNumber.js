@@ -3,39 +3,27 @@ import "./MiddleNumber.css";
 import { getDatabase, ref, onValue, get, set, remove} from "firebase/database";
 import { useState, useEffect, useRef } from "react";
 
-function merge(target, source) {
-    for (let key in source) {
-        if (typeof source[key] === 'object' && source[key] !== null) {
-            if (!target[key]) target[key] = {};
-            merge(target[key], source[key]);
-        } else {
-            target[key] = source[key];
-        }
-    }
-    return target;
-}
-
-function cloneObject(obj) {
-    return merge({}, obj);
-}
-
+// Function to determine the winner based on game rules
 export function determineWinner(players, suggestedNumber) {
     if (!players || players.length === 0) return null;
     
+    // Filter players who have submitted numbers (num !== 0)
     const playersWithNumbers = players.filter(p => p.num !== 0);
     
     if (playersWithNumbers.length === 0) return null;
     
     const numPlayers = playersWithNumbers.length;
     
+    // Create a list of numbers for comparison
     let numbers = playersWithNumbers.map((p, idx) => ({
         player: p,
         number: p.num,
         originalIndex: idx
     }));
     
+    // Special case: 2 players - add a random third number
     if (numPlayers === 2) {
-        const randomNum = suggestedNumber + Math.floor(Math.random() * 201) - 100;
+        const randomNum = suggestedNumber + Math.floor(Math.random() * 201) - 100; // within 100 of suggestion
         numbers.push({
             player: { uname: 'Computer', num: randomNum },
             number: randomNum,
@@ -43,13 +31,18 @@ export function determineWinner(players, suggestedNumber) {
         });
     }
     
+    // Sort by number
     numbers.sort((a, b) => a.number - b.number);
     
+    // Determine winner based on number of players
     if (numbers.length === 2) {
+        // Can't have middle with 2, so we shouldn't get here
         return null;
     } else if (numbers.length === 3) {
+        // Middle number wins (index 1 after sorting)
         return numbers[1].player;
     } else {
+        // 4 or more players: second smallest wins (index 1 after sorting)
         return numbers[1].player;
     }
 }
@@ -65,14 +58,6 @@ export function MiddleNumber(){
     const [allSubmitted, setAllSubmitted] = useState(false);
     const { roomID, uname } = useParams();
     const navigate = useNavigate();
-    
-    async function resetAllRooms() {
-        if (roomID.includes('admin')) {
-            const db = getDatabase();
-            const allRoomsRef = ref(db, "numrooms");
-            remove(allRoomsRef);
-        }
-    }
 
     async function gohome() {
         const db = getDatabase();
@@ -102,6 +87,7 @@ export function MiddleNumber(){
         const playerNamesRef = ref(db,"numrooms/"+roomID+"/unamesnum");
         const suggestedNumRef = ref(db,"numrooms/"+roomID+"/suggestedNumber");
 
+        // Initialize suggested number if it doesn't exist
         get(suggestedNumRef).then((snapshot) => {
             if(!snapshot.exists()){
                 const randomNum = Math.floor(Math.random() * 1000);
@@ -112,25 +98,30 @@ export function MiddleNumber(){
             }
         });
 
+        // Listen for suggested number changes
         const unsubscribeSuggested = onValue(suggestedNumRef, (snapshot) => {
             if(snapshot.exists()){
                 setSuggestedNumber(snapshot.val());
             }
         });
 
+        // Listen for player changes
         const unsubscribePlayers = onValue(playerNamesRef, (snapshot) => {
             const data = snapshot.val();
             if(data){
                 setPlayerNames(data);
                 
+                // Check if current user has submitted
                 const currentPlayer = data.find(p => p.uname === uname);
                 if(currentPlayer && currentPlayer.num !== 0){
                     setHasSubmitted(true);
                 }
                 
+                // Check if all players have submitted
                 const allHaveSubmitted = data.every(p => p.num !== 0);
                 setAllSubmitted(allHaveSubmitted);
                 
+                // Calculate winner if all submitted
                 if(allHaveSubmitted && suggestedNumber !== null){
                     const winningPlayer = determineWinner(data, suggestedNumber);
                     setWinner(winningPlayer);
@@ -148,12 +139,11 @@ export function MiddleNumber(){
     async function submitNumber(){
         const db = getDatabase();
         const reff = ref(db,"numrooms/"+roomID+"/unamesnum");
-        const enteredValue = numRef.current.value;
-        let enteredNum;
-        try {
-            enteredNum = eval(enteredValue);
-        } catch(e) {
-            enteredNum = enteredValue;
+        const enteredNum = parseInt(numRef.current.value);
+        
+        if(isNaN(enteredNum)){
+            alert("Please enter a valid number");
+            return;
         }
 
         await get(reff).then((snapshot) => {
@@ -162,7 +152,6 @@ export function MiddleNumber(){
                 for(let i = 0; i < temp.length; i++){
                     if(temp[i].uname === uname){
                         temp[i].num = enteredNum;
-                        temp[i].userInput = enteredValue; 
                         break;
                     }
                 }
@@ -179,7 +168,6 @@ export function MiddleNumber(){
         await get(reff).then((snapshot) => {
             if(snapshot.exists()){
                 let temp = snapshot.val();
-                temp = temp.map(player => cloneObject(player));
                 for(let i = 0; i < temp.length; i++){
                     if(temp[i].uname === uname){
                         temp[i].num = 0;
@@ -197,10 +185,7 @@ export function MiddleNumber(){
         const unameref = ref(db,"numrooms/"+roomID+"/unamesnum");
         const suggestedNumRef = ref(db,"numrooms/"+roomID+"/suggestedNumber");
         
-        localStorage.setItem('lastRoom', roomID);
-        localStorage.setItem('lastUser', uname);
-        localStorage.setItem('gameState', JSON.stringify(playerNames));
-        
+        // Reset all player numbers
         await get(unameref).then((snapshot) => {
             if(snapshot.exists()){
                 let temp = snapshot.val();
@@ -209,6 +194,7 @@ export function MiddleNumber(){
             }
         });
         
+        // Generate new suggested number
         const newRandomNum = Math.floor(Math.random() * 1000);
         await set(suggestedNumRef, newRandomNum);
         
@@ -219,8 +205,9 @@ export function MiddleNumber(){
     }
 
     const playerNamesDiv = playerNames.map((item, idx) => (
-        <p key={idx} style={{fontWeight: winner && winner.uname === item.uname ? 'bold' : 'normal'}} 
-           dangerouslySetInnerHTML={{__html: `${item.uname}: ${allSubmitted || item.uname === uname ? item.num : (item.num === 0 ? '?' : '✓')} ${winner && winner.uname === item.uname ? '🏆' : ''}`}}>
+        <p key={idx} style={{fontWeight: winner && winner.uname === item.uname ? 'bold' : 'normal'}}>
+            {item.uname}: {allSubmitted || item.uname === uname ? item.num : (item.num === 0 ? '?' : '✓')}
+            {winner && winner.uname === item.uname && ' 🏆'}
         </p>
     ));
 
@@ -229,24 +216,13 @@ export function MiddleNumber(){
             <div className="subthing">
                 <p className="headertext">The Middle Number Game</p>
                 <p>Room: {roomID}</p>
-                {roomID.includes('admin') && (
-                    <button onClick={resetAllRooms} style={{backgroundColor: 'red', color: 'white'}}>
-                        Admin: Reset All Rooms
-                    </button>
-                )}
                 <button onClick={gohome}>Go home</button>
                 { loading
                     ? <p>Loading...</p>
                     : (
                         <>
-                             <p style={{fontSize: '24px', fontWeight: 'bold', marginTop: '20px'}}>
+                            <p style={{fontSize: '24px', fontWeight: 'bold', marginTop: '20px'}}>
                                 Suggested Number: {suggestedNumber}
-                            </p>
-                            <p style={{fontSize: '12px', color: '#666'}}>
-                                Debug Info: Room Path: numrooms/{roomID}/unamesnum
-                            </p>
-                            <p style={{fontSize: '10px', color: '#888'}}>
-                                Current User: {uname} | Players: {playerNames.length}
                             </p>
                             <div style={{marginTop: '20px'}}>
                                 <p style={{fontSize: '18px', marginBottom: '10px'}}>Players:</p>
@@ -257,14 +233,6 @@ export function MiddleNumber(){
                                     🎉 Winner: {winner.uname} 🎉
                                 </p>
                             )}
-                            {allSubmitted && playerNames.length > 0 && (
-                                <div style={{fontSize: '12px', marginTop: '10px', color: '#999'}}>
-                                    <p>Raw submissions:</p>
-                                    {playerNames.map((p, idx) => (
-                                        <p key={idx} dangerouslySetInnerHTML={{__html: `${p.uname}: ${p.userInput || p.num}`}} />
-                                    ))}
-                                </div>
-                            )}
                         </>
                     )
                 }
@@ -272,7 +240,7 @@ export function MiddleNumber(){
             <div className="subthing">
                 <input 
                     ref={numRef}
-                    type="text"
+                    type="number"
                     placeholder="enter your number"
                     id="num"
                     disabled={hasSubmitted}

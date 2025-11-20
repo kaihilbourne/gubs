@@ -12,30 +12,14 @@ export function JoinGame(){
 
 
     const joinRoom = () => {
-        const room = roomRef.current.value;
-        const name = nameRef.current.value;
-        
-        localStorage.setItem('lastRoomJoined', room);
-        localStorage.setItem('userName', name);
-        localStorage.setItem('joinTimestamp', Date.now().toString());
-        
-        navigate('/gubs/'+room + '/'+name);
+        navigate('/gubs/'+roomRef.current.value + '/'+nameRef.current.value);
     };
 
     async function joinNumber(){
-        const name = nameRef.current.value;
-        const room = roomRef.current.value;
-        
-        let t = await createNumRoom(name, room);
+        // alert(nameRef.current.value+roomRef.current.value);
+        let t = await createNumRoom(nameRef.current.value,roomRef.current.value);
         if(t){
-            navigate('/numbers/'+room + '/'+name);
-            
-            sessionStorage.setItem('currentGame', JSON.stringify({
-                room: room,
-                username: name,
-                gameType: 'numbers',
-                timestamp: new Date().toISOString()
-            }));
+            navigate('/numbers/'+roomRef.current.value + '/'+nameRef.current.value);
         } else{
             alert("The grinch stole your username. Pick a different one.");
         }
@@ -50,12 +34,14 @@ export function JoinGame(){
                 ref={roomRef}
                 type="text"
                 placeholder="Room name"
+                pattern="[a-z]{3,}"
                 id="room"
             />
             <input 
                 type="text" 
                 ref = {nameRef}
                 placeholder="your name"
+                pattern="[a-z]{3,}"
                 id="urname"
             />
             <button onClick={joinRoom}>Enter</button>
