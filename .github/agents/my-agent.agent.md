@@ -1,7 +1,7 @@
 ---
 
 name: Security Professional
-description: 
+description: stops security vulnerabilities from being introduced
 ---
 
 # My Agent
